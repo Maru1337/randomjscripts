@@ -5,7 +5,7 @@ var renderclock = function () {
   let o            = (x               => Math.PI * (x - .5)),
       angle        = ((val, incircle) => val * 2.0 / incircle),
       framespersec = (x               => 1000.0 / x),
-      lawnch       = ((fn, fps)       => setInterval(fn,framespersec(fps)));
+      lawnch       = ((fps, fn)       => setInterval(fn,framespersec(fps)));
 
   function Render(x,y,clockradius,canvas,ctxsettings) {
     let ctx = canvas.getContext('2d');
@@ -67,7 +67,7 @@ var renderclock = function () {
     }
   }();
 
-  return function (canvas,ctxsettings,fps) {
+  return function (canvas,ctxsettings,fps = 15.0) {
     let cr = (canvas.height < canvas.width ? canvas.height : canvas.width) / 2,
         fontsize = cr / 5,
         cs = {
@@ -87,11 +87,11 @@ var renderclock = function () {
         s = m - cs.lineWidth - cs.shadowBlur / 2,
         radiuses = { h,m,s };
 
-    lawnch(function () {
+    lawnch(fps, function () {
       R.clr();
       let s = state();
       ['h','m','s'].forEach(i => R.drawarc(s[i],radiuses[i]));
       R.drawtxt(s.n,fontsize);
-    },fps || 15.0);
+    });
   }
 }();
