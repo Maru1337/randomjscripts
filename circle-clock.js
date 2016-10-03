@@ -15,7 +15,7 @@ var renderclock = function () {
       clr: function () {
         ctx.shadowBlur = 0;
         ctx.fillStyle = ctxsettings.fillStyle;
-        ctx.fillRect(x,y,2*clockradius,2*clockradius);
+        ctx.fillRect(x,y,canvas.width,canvas.height);
       },
 
       drawarc: function (angle,radius) {
