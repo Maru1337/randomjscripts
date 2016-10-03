@@ -1,15 +1,14 @@
-// example of use //
+// example of usage //
 // renderclock(document.getElementById('canvas'));
 
 var renderclock = function () {
-  function o            (x)            { return Math.PI   * (x - .5); }
-  function angle        (val,incircle) { return val * 2.0 / incircle; }
-  function framespersec (x)            { return 1000.0    / x       ; }
-
-  function lawnch (fn,fps) { setInterval(fn,framespersec(fps)); }
+  let o            = (x               => Math.PI * (x - .5)),
+      angle        = ((val, incircle) => val * 2.0 / incircle),
+      framespersec = (x               => 1000.0 / x),
+      lawnch       = ((fn, fps)       => setInterval(fn,framespersec(fps)));
 
   function Render(x,y,clockradius,canvas,ctxsettings) {
-    var ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d');
 
     return {
       clr: function () {
@@ -24,7 +23,7 @@ var renderclock = function () {
         , 'lineWidth'
         , 'lineCap'
         , 'strokeStyle'
-        ].forEach(function (k) { ctx[k] = ctxsettings[k]; });
+        ].forEach(k => ctx[k] = ctxsettings[k]);
         ctx.beginPath();
         ctx.arc(x + clockradius,y + clockradius,radius,o(.0),o(angle));
         ctx.stroke();
@@ -41,24 +40,24 @@ var renderclock = function () {
 
   var state = function() {
     function time() {
-      var dte = new Date(),
+      let dte = new Date(),
           s   = dte.getSeconds() + dte.getMilliseconds() / 1000.0,
           m   = dte.getMinutes() + s                     / 60.0,
           h   = dte.getHours  () + m                     / 60.0;
 
       function tostr(x) {
-        var strx = x.toString().slice(0,2);
+        let strx = x.toString().slice(0,2);
         return strx.charAt(1) === '.' ? '0' + strx.slice(0,1) : strx;
       }
 
       return {
-        h: h, m: m, s: s,
+        h,m,s,
         n: tostr(h) + ':' + tostr(m) + ':' + tostr(s)
       };
     }
 
     return function () {
-      var now = time();
+      let now = time();
       return {
         h: angle(now.h,24.0),
         m: angle(now.m,60.0),
@@ -69,28 +68,29 @@ var renderclock = function () {
   }();
 
   return function (canvas,ctxsettings,fps) {
-    var cr = (canvas.height < canvas.width ? canvas.height : canvas.width) / 2,
+    let cr = (canvas.height < canvas.width ? canvas.height : canvas.width) / 2,
         fontsize = cr / 5,
         cs = {
           strokeStyle: '#28d1fa',
           lineCap:     'round',
           shadowColor: '#28d1fa',
           fillStyle:   '#000',
-          font:        fontsize + 'px monospace'
+          font:        fontsize + 'px monospace',
+          lineWidth:   cr / 10,
+          shadowBlur:  cr / 10
         };
-    for (var s in ctxsettings) cs[s] = ctxsettings[s];
-    cs['lineWidth' ] = cs.lineWidth  || cr / 10;
-    cs['shadowBlur'] = cs.shadowBlur || cs.lineWidth;
-    var R  = Render(0,0,cr,canvas,cs),
-        hr = cr - cs.shadowBlur - 6,
-        mr = hr - cs.lineWidth - cs.shadowBlur / 2,
-        sr = mr - cs.lineWidth - cs.shadowBlur / 2,
-        radiuses = { h: hr, m: mr, s: sr };
+    for (let sett in ctxsettings) cs[sett] = ctxsettings[sett];
+
+    let R = Render(0,0,cr,canvas,cs),
+        h = cr - cs.shadowBlur - 6,
+        m = h - cs.lineWidth - cs.shadowBlur / 2,
+        s = m - cs.lineWidth - cs.shadowBlur / 2,
+        radiuses = { h,m,s };
 
     lawnch(function () {
       R.clr();
-      var s = state();
-      ['h','m','s'].forEach(function (i) { R.drawarc(s[i],radiuses[i]); });
+      let s = state();
+      ['h','m','s'].forEach(i => R.drawarc(s[i],radiuses[i]));
       R.drawtxt(s.n,fontsize);
     },fps || 15.0);
   }
